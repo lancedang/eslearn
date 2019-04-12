@@ -16,6 +16,9 @@ import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.sort.SortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -109,13 +112,16 @@ public class EsRunner implements CommandLineRunner {
         }
 
         //获取某个index/type下所有记录
-        SearchResponse searchResponse = transportClient.prepareSearch("mau-log-2019.04.13")
-        //SearchResponse searchResponse = transportClient.prepareSearch("logmetric-2019.04.11")
+        SearchResponse searchResponse = transportClient.prepareSearch("mau-log-2019.04.12")
+        //SearchResponse searchResponse = transportClient.prepareSearch("logmetric-2019.04.12")
                 //.setTypes("log")
                 .setSearchType(SearchType.QUERY_AND_FETCH)
+                .addSort(SortBuilders.fieldSort("timeStamp").order(SortOrder.DESC))
+                .setSize(10)
                 //.setQuery(QueryBuilders.matchQuery("name", field))
                 .get();
         List<SearchHit> searchHits = Arrays.asList(searchResponse.getHits().getHits());
+        System.out.println("document count=" + searchHits.size());
         Iterator<SearchHit> searchHitIterator = searchHits.iterator();
         while (searchHitIterator.hasNext()) {
             System.out.println(searchHitIterator.next().getSource());
